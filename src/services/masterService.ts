@@ -1,4 +1,4 @@
-import { apiClient } from '@/src/lib/apiClient'
+import { apiClient } from 'src/lib/apiClient'
 
 export const createMasterService = (endpoint: string) => ({
   getAll: () => apiClient.get(`/${endpoint}`),

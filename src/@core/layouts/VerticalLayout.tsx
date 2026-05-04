@@ -17,7 +17,6 @@ import { LayoutProps } from 'src/@core/layouts/types'
 
 // ** Components
 import AppBar from './components/vertical/appBar'
-import Customizer from 'src/@core/components/customizer'
 import Navigation from './components/vertical/navigation'
 import Footer from './components/shared-components/footer'
 import ScrollToTop from 'src/@core/components/scroll-to-top'
@@ -38,21 +37,21 @@ const MainContentWrapper = styled(Box)<BoxProps>({
 const ContentWrapper = styled('main')(({ theme }) => ({
   flexGrow: 1,
   width: '100%',
-  padding: theme.spacing(6),
+  padding: theme.spacing(6, 7),
   transition: 'padding .25s ease-in-out',
+  backgroundColor: theme.palette.background.default,
   [theme.breakpoints.down('sm')]: {
-    paddingLeft: theme.spacing(4),
-    paddingRight: theme.spacing(4)
+    padding: theme.spacing(4, 3)
   }
 }))
 
 const VerticalLayout = (props: LayoutProps) => {
   // ** Props
-  const { hidden, settings, children, scrollToTop, footerProps, contentHeightFixed, verticalLayoutProps } = props
+  const { settings, children, scrollToTop, footerProps, contentHeightFixed, verticalLayoutProps } = props
 
   // ** Vars
   const { skin, navHidden, contentWidth } = settings
-  const { navigationSize, disableCustomizer, collapsedNavigationSize } = themeConfig
+  const { navigationSize, collapsedNavigationSize } = themeConfig
   const navWidth = navigationSize
   const navigationBorderWidth = skin === 'bordered' ? 1 : 0
   const collapsedNavWidth = collapsedNavigationSize

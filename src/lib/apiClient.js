@@ -1,4 +1,4 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 const getHeaders = () => {
   const token = typeof window !== "undefined" 
@@ -13,11 +13,11 @@ const getHeaders = () => {
 
 async function handleResponse(response) {
   if (!response.ok) {
-    const error = await response.json();
+    const error = await response.json().catch(() => ({}));
     throw error;
   }
-  
-return response.json();
+
+  return response.json().catch(() => ({}));
 }
 
 // Generic API methods
@@ -32,8 +32,6 @@ return handleResponse(res);
   },
 
   post: async (url, data) => {
-
-    console.log('data', data,BASE_URL,url)
     const res = await fetch(`${BASE_URL}${url}`, {
       method: "POST",
       headers: getHeaders(),

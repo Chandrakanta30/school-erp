@@ -1,30 +1,26 @@
-'use client'
+import { useEffect, useMemo, useState } from 'react'
+import { useRouter } from 'next/router'
 
-import { useEffect, useState } from 'react'
-import {
-  Box,
-  Button,
-  Checkbox,
-  FormControlLabel,
-  TextField,
-  Typography,
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
-  TableBody,
-  TableContainer,
-  Card,
-  CardContent,
-  Stack,
-  CircularProgress
-} from '@mui/material'
-
-import { useForm, Controller } from 'react-hook-form'
-import { apiClient } from '@/src/lib/apiClient'
+import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
+import Checkbox from '@mui/material/Checkbox'
+import CircularProgress from '@mui/material/CircularProgress'
+import Divider from '@mui/material/Divider'
+import FormControlLabel from '@mui/material/FormControlLabel'
+import Grid from '@mui/material/Grid'
+import Stack from '@mui/material/Stack'
+import TextField from '@mui/material/TextField'
+import Typography from '@mui/material/Typography'
+import SaveIcon from '@mui/icons-material/Save'
+import { yupResolver } from '@hookform/resolvers/yup'
+import { Controller, useForm } from 'react-hook-form'
 import toast from 'react-hot-toast'
+import * as yup from 'yup'
 
-// ✅ Types
+import PageShell, { SurfaceCard } from 'src/components/admin/PageShell'
+import { LoadingState } from 'src/components/admin/FeedbackStates'
+import { apiClient } from 'src/lib/apiClient'
+
 type Permission = {
   id: number
   name: string
@@ -39,186 +35,190 @@ type GroupedPermissions = {
   [module: string]: string[]
 }
 
+const schema = yup.object({
+  name: yup.string().trim().required('This field is required').min(2, 'Role name must be at least 2 characters'),
+  permissions: yup.array().of(yup.string().required()).min(1, 'Select at least one permission').required()
+})
+
+const readRows = (response: any): Permission[] => {
+  const payload = response?.data?.data ?? response?.data ?? response
+  const rows = payload?.data ?? payload
+
+  return Array.isArray(rows) ? rows : []
+}
+
 const RoleCreatePage = () => {
+  const router = useRouter()
   const [permissions, setPermissions] = useState<Permission[]>([])
-  const [groupedPermissions, setGroupedPermissions] = useState<GroupedPermissions>({})
-  const [loading, setLoading] = useState<boolean>(false)
-  const [fetching, setFetching] = useState<boolean>(true)
+  const [loading, setLoading] = useState(false)
+  const [fetching, setFetching] = useState(true)
 
   const { control, handleSubmit, setValue, watch, reset } = useForm<FormValues>({
-    defaultValues: {
-      name: '',
-      permissions: []
-    }
+    defaultValues: { name: '', permissions: [] },
+    mode: 'onBlur',
+    resolver: yupResolver(schema)
   })
 
   const selectedPermissions = watch('permissions')
 
-  // 🔄 Fetch permissions
-  const fetchPermissions = async () => {
-    try {
-      const res: Permission[] = await apiClient.get('/permissions')
+  const groupedPermissions = useMemo<GroupedPermissions>(() => {
+    return permissions.reduce((grouped, permission) => {
+      const [module = 'general', action = permission.name] = permission.name.split('-')
 
-      setPermissions(res?.data)
+      if (!grouped[module]) grouped[module] = []
+      grouped[module].push(action)
 
-      const grouped: GroupedPermissions = {}
-
-      res?.data.forEach(p => {
-        const [module, action] = p.name.split('-')
-
-        if (!grouped[module]) grouped[module] = []
-        grouped[module].push(action)
-      })
-
-      setGroupedPermissions(grouped)
-    } catch (err) {
-      console.error(err)
-    } finally {
-      setFetching(false)
-    }
-  }
+      return grouped
+    }, {} as GroupedPermissions)
+  }, [permissions])
 
   useEffect(() => {
+    const fetchPermissions = async () => {
+      try {
+        setFetching(true)
+        const response = await apiClient.get('/permissions')
+        setPermissions(readRows(response))
+      } catch {
+        toast.error('Could not load permissions')
+      } finally {
+        setFetching(false)
+      }
+    }
+
     fetchPermissions()
   }, [])
 
-  // Toggle permission
-  const togglePermission = (perm: string) => {
-    const updated = selectedPermissions.includes(perm)
-      ? selectedPermissions.filter(p => p !== perm)
-      : [...selectedPermissions, perm]
+  const togglePermission = (permission: string) => {
+    const updated = selectedPermissions.includes(permission)
+      ? selectedPermissions.filter(item => item !== permission)
+      : [...selectedPermissions, permission]
 
     setValue('permissions', updated, { shouldValidate: true })
   }
 
-  // Select all
   const handleSelectAll = (checked: boolean) => {
-    if (checked) {
-      const all = permissions.map(p => p.name)
-      setValue('permissions', all)
-    } else {
-      setValue('permissions', [])
-    }
+    setValue('permissions', checked ? permissions.map(permission => permission.name) : [], { shouldValidate: true })
   }
 
   const isAllSelected = permissions.length > 0 && selectedPermissions.length === permissions.length
-
   const isIndeterminate = selectedPermissions.length > 0 && !isAllSelected
 
-  // Submit
   const onSubmit = async (data: FormValues) => {
     try {
       setLoading(true)
-
       await apiClient.post('/roles', data)
-
-      toast.success('Role created successfully')
-      reset()
-    } catch (err) {
-      console.error(err)
-      toast.error('Error creating role')
+      toast.success('Role created')
+      router.push('/apps/roles')
+    } catch (error: any) {
+      toast.error(error?.message || 'Could not create role')
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <Card>
-      <CardContent>
-        <Stack spacing={1} mb={4}>
-          <Typography variant='h5'>Create Role</Typography>
-          <Typography variant='body2'>Assign permissions dynamically</Typography>
-        </Stack>
-
-        {/* Role Name */}
-        <Box mb={4}>
-          <Controller
-            name='name'
-            control={control}
-            rules={{ required: 'Role name is required' }}
-            render={({ field, fieldState }) => (
-              <TextField
-                {...field}
-                label='Role Name'
-                fullWidth
-                error={!!fieldState.error}
-                helperText={fieldState.error?.message}
-              />
-            )}
-          />
-        </Box>
-
-        {/* Permissions */}
-        <Typography variant='h6' mb={2}>
-          Permissions
-        </Typography>
-
+    <PageShell title='Create Role' subtitle='Name a role and assign the permissions it should include.' backHref='/apps/roles'>
+      <SurfaceCard>
         {fetching ? (
-          <Box textAlign='center' py={6}>
-            <CircularProgress />
-          </Box>
+          <LoadingState label='Loading permissions...' />
         ) : (
-          <TableContainer>
-            <Table size='small'>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Module</TableCell>
-                  <TableCell colSpan={3}>
-                    <FormControlLabel
-                      label='Select All'
-                      control={
-                        <Checkbox
-                          checked={isAllSelected}
-                          indeterminate={isIndeterminate}
-                          onChange={e => handleSelectAll(e.target.checked)}
-                        />
-                      }
-                    />
-                  </TableCell>
-                </TableRow>
-              </TableHead>
+          <form noValidate onSubmit={handleSubmit(onSubmit)}>
+            <Stack spacing={5}>
+              <Controller
+                name='name'
+                control={control}
+                render={({ field, fieldState }) => (
+                  <TextField
+                    {...field}
+                    fullWidth
+                    required
+                    label='Role name'
+                    placeholder='Example: Academic Coordinator'
+                    error={!!fieldState.error}
+                    helperText={fieldState.error?.message}
+                  />
+                )}
+              />
 
-              <TableBody>
-                {Object.entries(groupedPermissions).map(([module, actions]) => (
-                  <TableRow key={module}>
-                    <TableCell sx={{ fontWeight: 600 }}>{module}</TableCell>
+              <Divider />
 
-                    {actions.map(action => {
-                      const key = `${module}-${action}`
+              <Stack spacing={3}>
+                <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent='space-between' spacing={2}>
+                  <Box>
+                    <Typography variant='h6'>Permissions</Typography>
+                    <Typography variant='body2' color='text.secondary'>
+                      Select the actions this role can perform.
+                    </Typography>
+                  </Box>
+                  <FormControlLabel
+                    label='Select all'
+                    control={
+                      <Checkbox
+                        checked={isAllSelected}
+                        indeterminate={isIndeterminate}
+                        onChange={event => handleSelectAll(event.target.checked)}
+                      />
+                    }
+                  />
+                </Stack>
 
-                      return (
-                        <TableCell key={action}>
-                          <FormControlLabel
-                            label={action}
-                            control={
-                              <Checkbox
-                                checked={selectedPermissions.includes(key)}
-                                onChange={() => togglePermission(key)}
+                <Grid container spacing={3}>
+                  {Object.entries(groupedPermissions).map(([module, actions]) => (
+                    <Grid item xs={12} md={6} lg={4} key={module}>
+                      <Box
+                        sx={{
+                          p: 3,
+                          height: '100%',
+                          borderRadius: 2,
+                          border: theme => `1px solid ${theme.palette.divider}`,
+                          bgcolor: 'background.paper'
+                        }}
+                      >
+                        <Typography variant='subtitle1' sx={{ mb: 1, textTransform: 'capitalize' }}>
+                          {module}
+                        </Typography>
+                        <Stack>
+                          {actions.map(action => {
+                            const permissionKey = `${module}-${action}`
+
+                            return (
+                              <FormControlLabel
+                                key={permissionKey}
+                                label={action}
+                                control={
+                                  <Checkbox
+                                    checked={selectedPermissions.includes(permissionKey)}
+                                    onChange={() => togglePermission(permissionKey)}
+                                  />
+                                }
                               />
-                            }
-                          />
-                        </TableCell>
-                      )
-                    })}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                            )
+                          })}
+                        </Stack>
+                      </Box>
+                    </Grid>
+                  ))}
+                </Grid>
+              </Stack>
+
+              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} justifyContent='flex-end'>
+                <Button variant='outlined' color='secondary' onClick={() => reset()}>
+                  Reset
+                </Button>
+                <Button
+                  type='submit'
+                  variant='contained'
+                  disabled={loading}
+                  startIcon={loading ? <CircularProgress size={18} color='inherit' /> : <SaveIcon />}
+                >
+                  Save Role
+                </Button>
+              </Stack>
+            </Stack>
+          </form>
         )}
-
-        {/* Actions */}
-        <Box mt={4} display='flex' gap={2}>
-          <Button variant='contained' onClick={handleSubmit(onSubmit)} disabled={loading}>
-            {loading ? <CircularProgress size={20} /> : 'Create Role'}
-          </Button>
-
-          <Button variant='outlined' onClick={() => reset()}>
-            Reset
-          </Button>
-        </Box>
-      </CardContent>
-    </Card>
+      </SurfaceCard>
+    </PageShell>
   )
 }
 

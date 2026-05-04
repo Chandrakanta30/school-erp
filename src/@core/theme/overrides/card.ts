@@ -7,6 +7,9 @@ const Card = (skin: Skin) => {
     MuiCard: {
       styleOverrides: {
         root: ({ theme }: OwnerStateThemeType) => ({
+          borderRadius: 8,
+          border: `1px solid ${theme.palette.divider}`,
+          boxShadow: theme.palette.mode === 'light' ? '0 10px 28px rgba(15, 23, 42, 0.06)' : '0 10px 28px rgba(0, 0, 0, 0.3)',
           ...(skin === 'bordered' && { border: `1px solid ${theme.palette.divider}` }),
           '& .card-more-options': {
             marginTop: theme.spacing(-1),
@@ -18,13 +21,16 @@ const Card = (skin: Skin) => {
         })
       },
       defaultProps: {
-        elevation: skin === 'bordered' ? 0 : 6
+        elevation: 0
       }
     },
     MuiCardHeader: {
       styleOverrides: {
         root: ({ theme }: OwnerStateThemeType) => ({
           padding: theme.spacing(5),
+          [theme.breakpoints.down('sm')]: {
+            padding: theme.spacing(4)
+          },
           '& + .MuiCardContent-root, & + .MuiCardActions-root, & + .MuiCollapse-root .MuiCardContent-root': {
             paddingTop: 0
           },
@@ -57,6 +63,11 @@ const Card = (skin: Skin) => {
           },
           '&:last-of-type': {
             paddingBottom: theme.spacing(5)
+          },
+          [theme.breakpoints.down('sm')]: {
+            '&:last-of-type': {
+              paddingBottom: theme.spacing(4)
+            }
           }
         })
       }

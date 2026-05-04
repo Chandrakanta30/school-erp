@@ -14,50 +14,53 @@ const typography = {
     '"Segoe UI Symbol"'
   ].join(','),
   h1: {
-    fontWeight: 500,
-    letterSpacing: '-1.5px'
+    fontWeight: 700,
+    letterSpacing: 0
   },
   h2: {
-    fontWeight: 500,
-    letterSpacing: '-0.5px'
+    fontWeight: 700,
+    letterSpacing: 0
   },
   h3: {
-    fontWeight: 500,
+    fontWeight: 700,
     letterSpacing: 0
   },
   h4: {
-    fontWeight: 500,
-    letterSpacing: '0.25px'
+    fontWeight: 700,
+    letterSpacing: 0
   },
   h5: {
-    fontWeight: 500,
+    fontWeight: 700,
     letterSpacing: 0
   },
   h6: {
-    letterSpacing: '0.15px'
+    fontWeight: 700,
+    letterSpacing: 0
   },
   subtitle1: {
-    letterSpacing: '0.15px'
+    letterSpacing: 0
   },
   subtitle2: {
-    letterSpacing: '0.1px'
+    letterSpacing: 0
   },
   body1: {
-    letterSpacing: '0.15px'
+    letterSpacing: 0
   },
   body2: {
     lineHeight: 1.429,
-    letterSpacing: '0.15px'
+    letterSpacing: 0
   },
   button: {
-    letterSpacing: '0.4px'
+    fontWeight: 700,
+    letterSpacing: 0,
+    textTransform: 'none' as const
   },
   caption: {
     lineHeight: 1.25,
-    letterSpacing: '0.4px'
+    letterSpacing: 0
   },
   overline: {
-    letterSpacing: '1px'
+    letterSpacing: 0
   }
 }
 

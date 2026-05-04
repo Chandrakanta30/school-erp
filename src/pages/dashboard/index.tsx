@@ -12,21 +12,15 @@ import {
   LinearProgress,
   Chip,
   Button,
-  Divider,
-  Tooltip
+  Divider
 } from '@mui/material'
 import {
-  TrendingUp,
-  Clock,
   Users,
-  GraduationCap,
   DollarSign,
   Calendar,
   MoreVertical,
   ArrowUpRight,
-  Zap,
-  Filter,
-  Bell
+  Zap
 } from 'lucide-react'
 
 // =========================================================================
@@ -38,7 +32,7 @@ const THEME = {
   warning: '#FF9F43',
   info: '#00CFE8',
   bg: '#F8F7FA',
-  cardRadius: '24px' // From Screenshot 2026-05-03 at 5.52.02 AM.jpg
+  cardRadius: '8px'
 }
 
 const GlassPaper = ({ children, sx = {}, ...props }: any) => (
@@ -67,7 +61,7 @@ export default function AdvancedDashboard() {
       {/* --- 1. Top Integrated Header --- */}
       <Stack direction='row' justifyContent='space-between' alignItems='center' mb={5}>
         <Box>
-          <Typography variant='h4' fontWeight='800' sx={{ letterSpacing: '-0.5px' }}>
+          <Typography variant='h4' fontWeight='800'>
             EduCore{' '}
             <Box component='span' sx={{ color: THEME.primary }}>
               Intelligence

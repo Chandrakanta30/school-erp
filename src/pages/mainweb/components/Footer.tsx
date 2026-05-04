@@ -7,7 +7,7 @@ export default function Footer() {
         <div className='footer-widgets-wrapper'>
           <div className='row'>
             <div className='col-xl-4'>
-              <img src='/assets/img/footer/Logo.svg' />
+              <img src='/assets/img/footer/Logo.svg' alt='Kidza' />
               <p>Kidza is an early childhood education school...</p>
             </div>
           </div>

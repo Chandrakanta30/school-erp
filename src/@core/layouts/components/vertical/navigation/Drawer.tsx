@@ -49,8 +49,7 @@ const Drawer = (props: Props) => {
     setNavHover,
     navMenuProps,
     setNavVisible,
-    collapsedNavWidth,
-    navigationBorderWidth
+    collapsedNavWidth
   } = props
 
   // ** Vars
@@ -106,11 +105,10 @@ const Drawer = (props: Props) => {
       {...(hidden ? { ...MobileDrawerProps } : { ...DesktopDrawerProps })}
       PaperProps={{
         sx: {
-          backgroundColor: 'background.default',
+          backgroundColor: 'background.paper',
           width: navCollapsed && !navHover ? collapsedNavWidth : navWidth,
+          borderRight: theme => `1px solid ${theme.palette.divider}`,
           ...(!hidden && navCollapsed && navHover ? { boxShadow: 10 } : {}),
-          borderRight: theme =>
-            navigationBorderWidth === 0 ? 0 : `${navigationBorderWidth}px solid ${theme.palette.divider}`,
           ...userNavMenuPaperStyle
         },
         ...navMenuProps?.PaperProps

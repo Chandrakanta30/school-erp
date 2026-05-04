@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Card, CardContent, TextField, MenuItem, Button, Typography, Stack, Autocomplete } from '@mui/material'
+import { Card, CardContent, TextField, Button, Typography, Stack, Autocomplete } from '@mui/material'
 
 import { useForm, Controller } from 'react-hook-form'
 import { apiClient } from '@/src/lib/apiClient'
@@ -49,22 +49,6 @@ const Page = () => {
       toast.error(e?.response?.data?.message || 'Error')
     }
   }
-
-  const renderSelect = (name: string, label: string, options: any[]) => (
-    <Controller
-      name={name}
-      control={control}
-      render={({ field }) => (
-        <TextField select label={label} fullWidth margin='normal' {...field}>
-          {options?.map((i: any) => (
-            <MenuItem key={i.id} value={i.id}>
-              {i.name}
-            </MenuItem>
-          ))}
-        </TextField>
-      )}
-    />
-  )
 
   const renderMultiSelect = (name: string, label: string, options: any[] = []) => (
     <Controller

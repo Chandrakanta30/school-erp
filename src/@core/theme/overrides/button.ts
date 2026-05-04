@@ -12,9 +12,15 @@ const Button = () => {
     MuiButton: {
       styleOverrides: {
         root: ({ ownerState, theme }: OwnerStateThemeType) => ({
-          fontWeight: 500,
+          fontWeight: 700,
           borderRadius: 8,
+          textTransform: 'none',
           lineHeight: 1.715,
+          transition: 'transform .18s ease, box-shadow .18s ease, background-color .18s ease',
+          '&:focus-visible': {
+            outline: `3px solid ${hexToRGBA(theme.palette.primary.main, 0.24)}`,
+            outlineOffset: 2
+          },
           ...(ownerState.size === 'medium' &&
             ownerState.variant === 'text' && {
               padding: `${theme.spacing(1.75, 3)}`
@@ -39,8 +45,12 @@ const Button = () => {
           }
         }),
         contained: ({ theme }: OwnerStateThemeType) => ({
-          boxShadow: theme.shadows[3],
-          padding: `${theme.spacing(1.75, 5.5)}`
+          boxShadow: `0 10px 20px ${hexToRGBA(theme.palette.primary.main, 0.18)}`,
+          padding: `${theme.spacing(1.75, 5.5)}`,
+          '&:hover': {
+            transform: 'translateY(-1px)',
+            boxShadow: `0 14px 26px ${hexToRGBA(theme.palette.primary.main, 0.22)}`
+          }
         }),
         outlined: ({ theme }: OwnerStateThemeType) => ({
           lineHeight: 1.572,

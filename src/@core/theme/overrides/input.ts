@@ -54,8 +54,14 @@ const input = () => {
       styleOverrides: {
         root: ({ theme }: OwnerStateThemeType) => ({
           borderRadius: 8,
+          backgroundColor: theme.palette.background.paper,
+          transition: 'border-color .18s ease, box-shadow .18s ease',
           '&:hover:not(.Mui-focused):not(.Mui-disabled):not(.Mui-error) .MuiOutlinedInput-notchedOutline': {
             borderColor: `rgba(${theme.palette.customColors.main}, 0.32)`
+          },
+          '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
+            borderWidth: 1,
+            boxShadow: `0 0 0 3px ${theme.palette.primary.main}22`
           },
           '&:hover.Mui-error .MuiOutlinedInput-notchedOutline': {
             borderColor: theme.palette.error.main

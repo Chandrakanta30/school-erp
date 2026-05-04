@@ -1,407 +1,206 @@
-// ** React Imports
-import { useState, ReactNode, MouseEvent } from 'react'
-
-// ** Next Imports
+import { ReactNode, useState } from 'react'
 import Link from 'next/link'
 
-// ** MUI Components
 import Alert from '@mui/material/Alert'
+import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
-import Divider from '@mui/material/Divider'
 import Checkbox from '@mui/material/Checkbox'
-import TextField from '@mui/material/TextField'
-import InputLabel from '@mui/material/InputLabel'
+import FormControlLabel from '@mui/material/FormControlLabel'
 import IconButton from '@mui/material/IconButton'
-import Box, { BoxProps } from '@mui/material/Box'
-import FormControl from '@mui/material/FormControl'
-import useMediaQuery from '@mui/material/useMediaQuery'
-import OutlinedInput from '@mui/material/OutlinedInput'
-import { styled, useTheme } from '@mui/material/styles'
-import FormHelperText from '@mui/material/FormHelperText'
 import InputAdornment from '@mui/material/InputAdornment'
-import Typography, { TypographyProps } from '@mui/material/Typography'
-import MuiFormControlLabel, { FormControlLabelProps } from '@mui/material/FormControlLabel'
-
-// ** Icon Imports
-import Icon from 'src/@core/components/icon'
-
-// ** Third Party Imports
-import * as yup from 'yup'
-import { useForm, Controller } from 'react-hook-form'
+import Paper from '@mui/material/Paper'
+import Stack from '@mui/material/Stack'
+import TextField from '@mui/material/TextField'
+import Typography from '@mui/material/Typography'
+import VisibilityIcon from '@mui/icons-material/Visibility'
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff'
+import LoginIcon from '@mui/icons-material/Login'
 import { yupResolver } from '@hookform/resolvers/yup'
+import { Controller, useForm } from 'react-hook-form'
+import * as yup from 'yup'
 
-// ** Hooks
+import BlankLayout from 'src/@core/layouts/BlankLayout'
 import { useAuth } from 'src/hooks/useAuth'
-import useBgColor from 'src/@core/hooks/useBgColor'
-import { useSettings } from 'src/@core/hooks/useSettings'
-
-// ** Configs
 import themeConfig from 'src/configs/themeConfig'
 
-// ** Layout Import
-import BlankLayout from 'src/@core/layouts/BlankLayout'
-
-// ** Demo Imports
-import FooterIllustrationsV2 from 'src/views/pages/auth/FooterIllustrationsV2'
-
-// ** Styled Components
-const LoginIllustrationWrapper = styled(Box)<BoxProps>(({ theme }) => ({
-  padding: theme.spacing(20),
-  paddingRight: '0 !important',
-  [theme.breakpoints.down('lg')]: {
-    padding: theme.spacing(10)
-  }
-}))
-
-const LoginIllustration = styled('img')(({ theme }) => ({
-  maxWidth: '48rem',
-  [theme.breakpoints.down('xl')]: {
-    maxWidth: '38rem'
-  },
-  [theme.breakpoints.down('lg')]: {
-    maxWidth: '30rem'
-  }
-}))
-
-const RightWrapper = styled(Box)<BoxProps>(({ theme }) => ({
-  width: '100%',
-  [theme.breakpoints.up('md')]: {
-    maxWidth: 400
-  },
-  [theme.breakpoints.up('lg')]: {
-    maxWidth: 450
-  }
-}))
-
-const BoxWrapper = styled(Box)<BoxProps>(({ theme }) => ({
-  width: '100%',
-  [theme.breakpoints.down('md')]: {
-    maxWidth: 400
-  }
-}))
-
-const TypographyStyled = styled(Typography)<TypographyProps>(({ theme }) => ({
-  fontWeight: 600,
-  letterSpacing: '0.18px',
-  marginBottom: theme.spacing(1.5),
-  [theme.breakpoints.down('md')]: { marginTop: theme.spacing(8) }
-}))
-
-const FormControlLabel = styled(MuiFormControlLabel)<FormControlLabelProps>(({ theme }) => ({
-  '& .MuiFormControlLabel-label': {
-    fontSize: '0.875rem',
-    color: theme.palette.text.secondary
-  }
-}))
-
-const schema = yup.object().shape({
-  email: yup.string().email().required(),
-  password: yup.string().min(5).required()
-})
-
-const defaultValues = {
-  password: 'admin',
-  email: 'admin@materialize.com'
-}
-
-interface FormData {
+type FormData = {
   email: string
   password: string
 }
 
+const schema = yup.object({
+  email: yup.string().trim().required('This field is required').email('Invalid email format'),
+  password: yup.string().required('This field is required').min(8, 'Password must be at least 8 characters')
+})
+
 const LoginPage = () => {
-  const [rememberMe, setRememberMe] = useState<boolean>(true)
-  const [showPassword, setShowPassword] = useState<boolean>(false)
-
-  // ** Hooks
   const auth = useAuth()
-  const theme = useTheme()
-  const bgColors = useBgColor()
-  const { settings } = useSettings()
-  const hidden = useMediaQuery(theme.breakpoints.down('md'))
-
-  // ** Vars
-  const { skin } = settings
+  const [rememberMe, setRememberMe] = useState(true)
+  const [showPassword, setShowPassword] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
 
   const {
     control,
     setError,
     handleSubmit,
     formState: { errors }
-  } = useForm({
-    defaultValues,
+  } = useForm<FormData>({
+    defaultValues: { email: '', password: '' },
     mode: 'onBlur',
     resolver: yupResolver(schema)
   })
 
   const onSubmit = (data: FormData) => {
-    const { email, password } = data
-    auth.login({ email, password, rememberMe }, () => {
-      setError('email', {
-        type: 'manual',
-        message: 'Email or Password is invalid'
-      })
+    setSubmitting(true)
+    auth.login({ ...data, rememberMe }, () => {
+      setSubmitting(false)
+      setError('email', { type: 'manual', message: 'Email or password is invalid' })
     })
   }
 
-  const imageSource = skin === 'bordered' ? 'auth-v2-login-illustration-bordered' : 'auth-v2-login-illustration'
-
   return (
-    <Box className='content-right'>
-      {!hidden ? (
-        <Box sx={{ flex: 1, display: 'flex', position: 'relative', alignItems: 'center', justifyContent: 'center' }}>
-          <LoginIllustrationWrapper>
-            <LoginIllustration
-              alt='login-illustration'
-              src={`/images/pages/${imageSource}-${theme.palette.mode}.png`}
-            />
-          </LoginIllustrationWrapper>
-          <FooterIllustrationsV2 />
-        </Box>
-      ) : null}
-      <RightWrapper sx={skin === 'bordered' && !hidden ? { borderLeft: `1px solid ${theme.palette.divider}` } : {}}>
-        <Box
+    <Box
+      sx={{
+        minHeight: '100vh',
+        display: 'grid',
+        gridTemplateColumns: { xs: '1fr', md: 'minmax(0, 1fr) 460px' },
+        bgcolor: 'background.default'
+      }}
+    >
+      <Box
+        sx={{
+          display: { xs: 'none', md: 'flex' },
+          flexDirection: 'column',
+          justifyContent: 'space-between',
+          p: 8,
+          color: 'common.white',
+          background:
+            'linear-gradient(135deg, rgba(37,99,235,0.95), rgba(5,150,105,0.88)), url(/images/pages/auth-v2-login-illustration-light.png)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center'
+        }}
+      >
+        <Typography variant='h5' sx={{ color: 'common.white' }}>
+          {themeConfig.templateName}
+        </Typography>
+        <Stack spacing={3} sx={{ maxWidth: 560 }}>
+          <Typography variant='h2' sx={{ color: 'common.white' }}>
+            Run school operations with clarity.
+          </Typography>
+          <Typography sx={{ color: 'rgba(255,255,255,0.82)', fontSize: '1.05rem' }}>
+            Admissions, academics, staff, and daily workflows live in one focused admin workspace.
+          </Typography>
+        </Stack>
+      </Box>
+
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          p: { xs: 3, sm: 6 }
+        }}
+      >
+        <Paper
+          elevation={0}
           sx={{
-            p: 7,
-            height: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            backgroundColor: 'background.paper'
+            width: '100%',
+            maxWidth: 420,
+            p: { xs: 4, sm: 5 },
+            borderRadius: 2,
+            border: theme => `1px solid ${theme.palette.divider}`
           }}
         >
-          <BoxWrapper>
-            <Box
-              sx={{
-                top: 30,
-                left: 40,
-                display: 'flex',
-                position: 'absolute',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-            >
-              <svg width={47} fill='none' height={26} viewBox='0 0 268 150' xmlns='http://www.w3.org/2000/svg'>
-                <rect
-                  rx='25.1443'
-                  width='50.2886'
-                  height='143.953'
-                  fill={theme.palette.primary.main}
-                  transform='matrix(-0.865206 0.501417 0.498585 0.866841 195.571 0)'
-                />
-                <rect
-                  rx='25.1443'
-                  width='50.2886'
-                  height='143.953'
-                  fillOpacity='0.4'
-                  fill='url(#paint0_linear_7821_79167)'
-                  transform='matrix(-0.865206 0.501417 0.498585 0.866841 196.084 0)'
-                />
-                <rect
-                  rx='25.1443'
-                  width='50.2886'
-                  height='143.953'
-                  fill={theme.palette.primary.main}
-                  transform='matrix(0.865206 0.501417 -0.498585 0.866841 173.147 0)'
-                />
-                <rect
-                  rx='25.1443'
-                  width='50.2886'
-                  height='143.953'
-                  fill={theme.palette.primary.main}
-                  transform='matrix(-0.865206 0.501417 0.498585 0.866841 94.1973 0)'
-                />
-                <rect
-                  rx='25.1443'
-                  width='50.2886'
-                  height='143.953'
-                  fillOpacity='0.4'
-                  fill='url(#paint1_linear_7821_79167)'
-                  transform='matrix(-0.865206 0.501417 0.498585 0.866841 94.1973 0)'
-                />
-                <rect
-                  rx='25.1443'
-                  width='50.2886'
-                  height='143.953'
-                  fill={theme.palette.primary.main}
-                  transform='matrix(0.865206 0.501417 -0.498585 0.866841 71.7728 0)'
-                />
-                <defs>
-                  <linearGradient
-                    y1='0'
-                    x1='25.1443'
-                    x2='25.1443'
-                    y2='143.953'
-                    id='paint0_linear_7821_79167'
-                    gradientUnits='userSpaceOnUse'
-                  >
-                    <stop />
-                    <stop offset='1' stopOpacity='0' />
-                  </linearGradient>
-                  <linearGradient
-                    y1='0'
-                    x1='25.1443'
-                    x2='25.1443'
-                    y2='143.953'
-                    id='paint1_linear_7821_79167'
-                    gradientUnits='userSpaceOnUse'
-                  >
-                    <stop />
-                    <stop offset='1' stopOpacity='0' />
-                  </linearGradient>
-                </defs>
-              </svg>
-              <Typography variant='h6' sx={{ ml: 2, lineHeight: 1, fontWeight: 700, fontSize: '1.5rem !important' }}>
-                {themeConfig.templateName}
+          <Stack spacing={4}>
+            <Stack spacing={1}>
+              <Typography variant='h4' component='h1'>
+                Welcome back
               </Typography>
-            </Box>
-            <Box sx={{ mb: 6 }}>
-              <TypographyStyled variant='h5'>{`Welcome to ${themeConfig.templateName}! 👋🏻`}</TypographyStyled>
-              <Typography variant='body2'>Please sign-in to your account and start the adventure</Typography>
-            </Box>
-            <Alert icon={false} sx={{ py: 3, mb: 6, ...bgColors.primaryLight, '& .MuiAlert-message': { p: 0 } }}>
-              <Typography variant='caption' sx={{ mb: 2, display: 'block', color: 'primary.main' }}>
-                Admin: <strong>admin@materialize.com</strong> / Pass: <strong>admin</strong>
-              </Typography>
-              <Typography variant='caption' sx={{ display: 'block', color: 'primary.main' }}>
-                Client: <strong>client@materialize.com</strong> / Pass: <strong>client</strong>
-              </Typography>
-            </Alert>
-            <form noValidate autoComplete='off' onSubmit={handleSubmit(onSubmit)}>
-              <FormControl fullWidth sx={{ mb: 4 }}>
+              <Typography color='text.secondary'>Sign in to continue to your admin dashboard.</Typography>
+            </Stack>
+
+            {errors.email?.type === 'manual' ? <Alert severity='error'>{errors.email.message}</Alert> : null}
+
+            <Box component='form' noValidate onSubmit={handleSubmit(onSubmit)}>
+              <Stack spacing={3}>
                 <Controller
                   name='email'
                   control={control}
-                  rules={{ required: true }}
-                  render={({ field: { value, onChange, onBlur } }) => (
+                  render={({ field, fieldState }) => (
                     <TextField
+                      {...field}
                       autoFocus
-                      label='Email'
-                      value={value}
-                      onBlur={onBlur}
-                      onChange={onChange}
-                      error={Boolean(errors.email)}
-                      placeholder='admin@materialize.com'
+                      required
+                      fullWidth
+                      type='email'
+                      label='Email address'
+                      placeholder='admin@school.edu'
+                      error={!!fieldState.error}
+                      helperText={fieldState.error?.message}
                     />
                   )}
                 />
-                {errors.email && <FormHelperText sx={{ color: 'error.main' }}>{errors.email.message}</FormHelperText>}
-              </FormControl>
-              <FormControl fullWidth>
-                <InputLabel htmlFor='auth-login-v2-password' error={Boolean(errors.password)}>
-                  Password
-                </InputLabel>
+
                 <Controller
                   name='password'
                   control={control}
-                  rules={{ required: true }}
-                  render={({ field: { value, onChange, onBlur } }) => (
-                    <OutlinedInput
-                      value={value}
-                      onBlur={onBlur}
+                  render={({ field, fieldState }) => (
+                    <TextField
+                      {...field}
+                      required
+                      fullWidth
                       label='Password'
-                      onChange={onChange}
-                      id='auth-login-v2-password'
-                      error={Boolean(errors.password)}
                       type={showPassword ? 'text' : 'password'}
-                      endAdornment={
-                        <InputAdornment position='end'>
-                          <IconButton
-                            edge='end'
-                            onMouseDown={e => e.preventDefault()}
-                            onClick={() => setShowPassword(!showPassword)}
-                          >
-                            <Icon icon={showPassword ? 'mdi:eye-outline' : 'mdi:eye-off-outline'} fontSize={20} />
-                          </IconButton>
-                        </InputAdornment>
-                      }
+                      error={!!fieldState.error}
+                      helperText={fieldState.error?.message}
+                      InputProps={{
+                        endAdornment: (
+                          <InputAdornment position='end'>
+                            <IconButton
+                              edge='end'
+                              aria-label={showPassword ? 'Hide password' : 'Show password'}
+                              onMouseDown={event => event.preventDefault()}
+                              onClick={() => setShowPassword(value => !value)}
+                            >
+                              {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                            </IconButton>
+                          </InputAdornment>
+                        )
+                      }}
                     />
                   )}
                 />
-                {errors.password && (
-                  <FormHelperText sx={{ color: 'error.main' }} id=''>
-                    {errors.password.message}
-                  </FormHelperText>
-                )}
-              </FormControl>
-              <Box
-                sx={{ mb: 4, display: 'flex', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'space-between' }}
-              >
-                <FormControlLabel
-                  label='Remember Me'
-                  control={<Checkbox checked={rememberMe} onChange={e => setRememberMe(e.target.checked)} />}
-                />
-                <Typography
-                  variant='body2'
-                  component={Link}
-                  href='/forgot-password'
-                  sx={{ color: 'primary.main', textDecoration: 'none' }}
+
+                <Stack direction='row' alignItems='center' justifyContent='space-between' spacing={2}>
+                  <FormControlLabel
+                    control={<Checkbox checked={rememberMe} onChange={event => setRememberMe(event.target.checked)} />}
+                    label='Remember me'
+                  />
+                  <Typography component={Link} href='/forgot-password' color='primary' sx={{ textDecoration: 'none' }}>
+                    Forgot password?
+                  </Typography>
+                </Stack>
+
+                <Button
+                  fullWidth
+                  size='large'
+                  type='submit'
+                  variant='contained'
+                  disabled={submitting}
+                  startIcon={<LoginIcon />}
                 >
-                  Forgot Password?
-                </Typography>
-              </Box>
-              <Button fullWidth size='large' type='submit' variant='contained' sx={{ mb: 7 }}>
-                Login
-              </Button>
-              <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
-                <Typography sx={{ mr: 2, color: 'text.secondary' }}>New on our platform?</Typography>
-                <Typography href='/register' component={Link} sx={{ color: 'primary.main', textDecoration: 'none' }}>
-                  Create an account
-                </Typography>
-              </Box>
-              <Divider
-                sx={{
-                  '& .MuiDivider-wrapper': { px: 4 },
-                  mt: theme => `${theme.spacing(5)} !important`,
-                  mb: theme => `${theme.spacing(7.5)} !important`
-                }}
-              >
-                or
-              </Divider>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <IconButton
-                  href='/'
-                  component={Link}
-                  sx={{ color: '#497ce2' }}
-                  onClick={(e: MouseEvent<HTMLElement>) => e.preventDefault()}
-                >
-                  <Icon icon='mdi:facebook' />
-                </IconButton>
-                <IconButton
-                  href='/'
-                  component={Link}
-                  sx={{ color: '#1da1f2' }}
-                  onClick={(e: MouseEvent<HTMLElement>) => e.preventDefault()}
-                >
-                  <Icon icon='mdi:twitter' />
-                </IconButton>
-                <IconButton
-                  href='/'
-                  component={Link}
-                  onClick={(e: MouseEvent<HTMLElement>) => e.preventDefault()}
-                  sx={{ color: theme => (theme.palette.mode === 'light' ? '#272727' : 'grey.300') }}
-                >
-                  <Icon icon='mdi:github' />
-                </IconButton>
-                <IconButton
-                  href='/'
-                  component={Link}
-                  sx={{ color: '#db4437' }}
-                  onClick={(e: MouseEvent<HTMLElement>) => e.preventDefault()}
-                >
-                  <Icon icon='mdi:google' />
-                </IconButton>
-              </Box>
-            </form>
-          </BoxWrapper>
-        </Box>
-      </RightWrapper>
+                  {submitting ? 'Signing in...' : 'Sign in'}
+                </Button>
+              </Stack>
+            </Box>
+          </Stack>
+        </Paper>
+      </Box>
     </Box>
   )
 }
 
 LoginPage.getLayout = (page: ReactNode) => <BlankLayout>{page}</BlankLayout>
-
 LoginPage.guestGuard = true
 
 export default LoginPage

@@ -1,7 +1,7 @@
 // app/layout.tsx
 
-import './globals.css'
 import Script from 'next/script'
+import Link from 'next/link'
 
 export const metadata = {
   title: 'Kidza - Kindergarten',
@@ -43,7 +43,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <div className='offcanvas__content'>
                 <div className='offcanvas__top d-flex justify-content-between'>
                   <div className='offcanvas__logo'>
-                    <img src='/assets/img/logo/black-logo.svg' />
+                    <img src='/assets/img/logo/black-logo.svg' alt='Kidza' />
                   </div>
                 </div>
 
@@ -73,16 +73,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <div className='container'>
               <div className='header-main'>
                 <div className='header-left'>
-                  <a href='/' className='header-logo'>
-                    <img src='/assets/img/logo/black-logo.svg' />
-                  </a>
+                  <Link href='/' className='header-logo'>
+                    <img src='/assets/img/logo/black-logo.svg' alt='Kidza' />
+                  </Link>
                 </div>
 
                 <div className='mean__menu-wrapper'>
                   <nav>
                     <ul>
                       <li>
-                        <a href='/'>Home</a>
+                        <Link href='/'>Home</Link>
                       </li>
                       <li>
                         <a href='#'>Programs</a>
@@ -116,7 +116,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <div className='footer-widgets-wrapper'>
               <div className='row'>
                 <div className='col-xl-4'>
-                  <img src='/assets/img/footer/Logo.svg' />
+                  <img src='/assets/img/footer/Logo.svg' alt='Kidza' />
                   <p>Kidza is an early childhood education school...</p>
                 </div>
 

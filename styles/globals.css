@@ -1,6 +1,10 @@
 html,
 body {
   min-height: 100%;
+  background: #f6f8fb;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 #__next {
@@ -14,6 +18,14 @@ code {
   font-size: 90%;
   color: #d400ff;
   border-radius: 0.1335rem;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+a {
+  color: inherit;
 }
 code:not([class*='language-']):before,
 code:not([class*='language-']):after {

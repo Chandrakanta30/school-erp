@@ -6,7 +6,7 @@ import { Box, Button, Card, CardContent, TextField, Typography, Stack, CircularP
 import { useForm, Controller } from 'react-hook-form'
 import { apiClient } from '@/src/lib/apiClient'
 import toast from 'react-hot-toast'
-import { useRouter } from 'next/navigation'
+import { useRouter } from 'next/router'
 
 // ✅ Types
 type Role = {
@@ -63,7 +63,7 @@ const UserCreatePage = () => {
       toast.success('User created 🎉')
       reset()
 
-      //   router.push('/users')
+      router.push('/apps/user')
     } catch (err: any) {
       toast.error(err?.message || 'Error creating user')
     } finally {

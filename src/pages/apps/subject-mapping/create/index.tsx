@@ -7,8 +7,6 @@ import { useForm, Controller } from 'react-hook-form'
 import { apiClient } from '@/src/lib/apiClient'
 import toast from 'react-hot-toast'
 
-type Option = { id: number; name: string }
-
 export default function Page() {
   const { control, handleSubmit, setValue, watch } = useForm({
     defaultValues: {

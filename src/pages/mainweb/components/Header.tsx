@@ -1,4 +1,5 @@
 // components/Header.tsx
+import Link from 'next/link'
 
 export default function Header() {
   return (
@@ -18,15 +19,15 @@ export default function Header() {
         <div className='container'>
           <div className='header-main'>
             <div className='header-left'>
-              <a href='/' className='header-logo'>
+              <Link href='/' className='header-logo'>
                 <img src='/assets/img/logo/black-logo.svg' alt='logo' />
-              </a>
+              </Link>
             </div>
 
             <nav className='main-menu'>
               <ul>
                 <li>
-                  <a href='/'>Home</a>
+                  <Link href='/'>Home</Link>
                 </li>
                 <li>
                   <a href='#'>Programs</a>
